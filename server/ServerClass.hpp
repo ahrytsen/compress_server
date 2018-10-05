@@ -23,7 +23,7 @@ class Server {
 	Server( void );
 	Server( Server const & );
 	Server &						operator=( Server const & );
-	bool							get_request( boost::asio::ip::tcp::socket & sock, Message & request );
+	void							get_request( boost::asio::ip::tcp::socket & sock, Message & request );
 	void							send_responce();
 	void							session( boost::shared_ptr< boost::asio::ip::tcp::socket > sock );
 	std::string						compressPayload( char const * bufer, uint16_t size);
@@ -32,6 +32,18 @@ public:
 	Server( boost::asio::io_service & io_service, uint16_t port );
 	void	run( void );
 	~Server() {};
+	class	RequestException : public std::exception {
+		Message::ResponceCode	_code;
+		std::string				_what;
+	public:
+		RequestException( void );
+		RequestException( Message::ResponceCode code );
+		RequestException( RequestException const & e );
+		virtual ~RequestException( void );
+		FatalErrorException&	operator=( FatalErrorException const & e );
+		virtual const char* code() const;
+		virtual char const * what() const;
+	};
 };
 
 #endif

@@ -12,6 +12,18 @@ public:
 		host,
 		network
 	};
+	enum	RequestCode {
+		ping = 1,
+		get_status,
+		reset_status,
+		compress,
+	};
+	enum	ResponceCode {
+		request_ok,
+		unknown_error,
+		message_too_large,
+		unsupported_request_type,
+	};
 	struct Header {
 		uint32_t	magic_value;
 		uint16_t	payload_length;
