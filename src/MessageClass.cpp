@@ -7,6 +7,12 @@ Message::Message( void ) :
 	_header.code = 0;
 }
 
+Message::Message( uint16_t const & code ) :
+	_byte_order(host), _payload(nullptr) {
+	_header.magic_value = MAGIC_VALUE;
+	_header.payload_length = 0;
+	_header.code = code;
+}
 
 Message::Message( uint32_t const & payload_length, uint16_t const & code, void const * & payload ) :
 	_byte_order(host), _payload(&payload) {
@@ -17,6 +23,16 @@ Message::Message( uint32_t const & payload_length, uint16_t const & code, void c
 
 Message::Header *	Message::getHeader( void ) {
 	return &_header;
+}
+
+bool			Message::checkMagic( void ) {
+	if (_header.magic_value != MAGIC_VALUE)
+		return false;
+	return true;
+}
+
+uint16_t			Message::getCode( void ) const {
+	return _header.code;
 }
 
 void const*		Message::getPayload( void ) const {
@@ -47,6 +63,14 @@ void			Message::toHostOrder( void ) {
 
 void			Message::setPayload( void * payload) {
 	_payload = payload;
+}
+
+void			Message::setPayloadLength( uint16_t length ) {
+	_header.payload_length = length;
+}
+
+void			Message::setCode( ResponseCode code ) {
+	_header.code = static_cast<uint16_t>(code);
 }
 
 Message::~Message( void ) {
