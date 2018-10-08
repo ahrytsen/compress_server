@@ -38,7 +38,11 @@ RM			=	rm -rf
 all		:		$(NAME_S) $(NAME_C)
 
 $(NAME_S):		$(DIROBJ_S) $(OBJ) $(OBJ_S)
-				$(CC) $(INC_LIB) $(CFLAGS) -o $(NAME_S) $(OBJ_S) $(OBJ)
+				$(CC) -o $(NAME_S) $(OBJ_S) $(OBJ) $(INC_LIB) $(CFLAGS)
+				@echo
+				@echo "run server: ./run.sh [port]"
+				@echo "port number by default '4000'"
+				@echo
 
 $(NAME_C):		$(DIROBJ_C) $(OBJ) $(OBJ_C)
 				$(CC) $(INC_LIB) $(CFLAGS) -o $(NAME_C) $(OBJ_C) $(OBJ)
