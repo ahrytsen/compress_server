@@ -6,12 +6,22 @@
   - GNU Make 3.81
   
 ## Description:
-  - Implement in C++11 using boost library.
+  - Implemented in C++11 using boost library.
   - Server works synchronus.
-  - Each client in separete thread. 
+  - Each client services in separate thread. 
+  - Server uses regular expresions for compression algorithm.
+  - Implementer defined response codes:
+    - Request specific:
+      - Empty Payload 33;
+      - Unsupported Payload 34;
+    - Server Errors(not request specific):
+      - Bad Allocation  35;
+      - System Error  36;
 
 ## Libraries:
-  - boost (::asio , ::thread, ::regex
+  - boost (::asio , ::thread, ::regex).
   
 ## Assumptions:
+  In case when it's not compress request and we have non-zero payload or payload too big,
+  I decide just to reject that payload.
   
