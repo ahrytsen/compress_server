@@ -258,8 +258,17 @@ Server::RequestException::RequestException( Message::ResponseCode code )
 	case Message::unsupported_request_type:
 		_what = "Unsupported Request Type";
 		break ;
+	case Message::empty_payload:
+		_what = "Empty Payload";
+		break ;
 	case Message::unsupported_payload:
 		_what = "Unsupported Payload Sequence";
+		break ;
+	case Message::bad_allocation:
+		_what = "Allocation Error";
+		break ;
+	case Message::system_error:
+		_what = "Some System Error";
 		break ;
 	case Message::unknown_error:
 	default:
