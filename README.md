@@ -1,5 +1,4 @@
 # compress_server
-=================
 
 ## Target platform:
   - Ubuntu 18.04.1 LTS
@@ -7,6 +6,12 @@
   - GNU Make 3.81
   
 ## Description:
-  Server works synchronus, each client in separete thread. 
+  - Implement in C++11 using boost library.
+  - Server works synchronus.
+  - Each client in separete thread. 
 
 ## Libraries:
+  - boost (::asio , ::thread, ::regex
+  
+## Assumptions:
+  
