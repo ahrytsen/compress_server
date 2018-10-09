@@ -1,4 +1,4 @@
-# compress_server
+# CompressServer
 
 ## Target platform:
   - Ubuntu 18.04.1 LTS
@@ -22,6 +22,6 @@
   - boost (::asio , ::thread, ::regex).
   
 ## Assumptions:
-  In case when it's not compress request and we have non-zero payload or payload too big,
+  In case when it's not the compress request and we have non-zero payload or payload too big,
   I decide just to reject that payload.
   
