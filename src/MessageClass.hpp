@@ -8,10 +8,6 @@
 
 class Message {
 public:
-	enum ByteOrder {
-		host,
-		network
-	};
 	enum	RequestCode {
 		ping = 1,
 		get_status,
@@ -24,6 +20,7 @@ public:
 		message_too_large,
 		unsupported_request_type,
 		empty_payload = 33,
+		unsupported_payload,
 //server errors(non-request specific):
 		bad_allocation,
 		system_error,
@@ -48,7 +45,6 @@ public:
 	void			setCode( ResponseCode code );
 	~Message( void );
 private:
-	ByteOrder	_byte_order;
 	Header		_header;
 	void *		_payload;
 

@@ -34,8 +34,8 @@ class Server {
 	Message::ResponseCode			getServerStatus( void ) const;
 	void							setServerStatus(Message::ResponseCode code);
 	void							resetCounters( void );
-	void							reject_payload( boost::asio::ip::tcp::socket & sock, uint32_t size );
-	void*							receive_payload( boost::asio::ip::tcp::socket & sock, uint32_t size );
+	void							reject_payload( boost::asio::ip::tcp::socket & sock, uint16_t size );
+	void*							receive_payload( boost::asio::ip::tcp::socket & sock, uint16_t size );
 	void							get_request( boost::asio::ip::tcp::socket & sock, Message & request );
 	void							proccess_request( Message & request, Message & response );
 	void							send_response( boost::asio::ip::tcp::socket & sock, Message & response );

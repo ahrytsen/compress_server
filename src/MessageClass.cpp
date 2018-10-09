@@ -1,21 +1,21 @@
 #include "MessageClass.hpp"
 
-Message::Message( void ) :
-	_byte_order(host), _payload(nullptr) {
+Message::Message( void )
+	: _payload(nullptr) {
 	_header.magic_value = MAGIC_VALUE;
 	_header.payload_length = 0;
 	_header.code = 0;
 }
 
-Message::Message( uint16_t const & code ) :
-	_byte_order(host), _payload(nullptr) {
+Message::Message( uint16_t const & code )
+	: _payload(nullptr) {
 	_header.magic_value = MAGIC_VALUE;
 	_header.payload_length = 0;
 	_header.code = code;
 }
 
-Message::Message( uint32_t const & payload_length, uint16_t const & code, void const * & payload ) :
-	_byte_order(host), _payload(&payload) {
+Message::Message( uint32_t const & payload_length, uint16_t const & code, void const * & payload )
+	: _payload(&payload) {
 	_header.magic_value = MAGIC_VALUE;
 	_header.payload_length = payload_length;
 	_header.code = code;
@@ -44,21 +44,15 @@ uint16_t		Message::getPayloadLength( void ) const {
 }
 
 void			Message::toNetworkOrder( void ) {
-	if (_byte_order == host) {
 		_header.magic_value = htonl(_header.magic_value);
 		_header.payload_length = htons(_header.payload_length);
 		_header.code = htons(_header.code);
-		_byte_order = network;
-	}
 }
 
 void			Message::toHostOrder( void ) {
-	if (_byte_order == network) {
 		_header.magic_value = ntohl(_header.magic_value);
 		_header.payload_length = ntohs(_header.payload_length);
 		_header.code = ntohs(_header.code);
-		_byte_order = host;
-	}
 }
 
 void			Message::setPayload( void * payload) {

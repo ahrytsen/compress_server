@@ -6,9 +6,9 @@ DIRSRC_S	=	./src/server/
 DIRSRC_C	=	./src/client/
 DIROBJ		=	./obj/
 DIROBJ_S	=	./obj/server/
-DIROBJ_S	=	./obj/client/
+DIROBJ_C	=	./obj/client/
 
-INC_LIB		=	-lboost_thread -lboost_system -lboost_regex
+INC_LIB		=	-lboost_thread -lboost_system -lboost_regex -lpthread
 
 SRC			=	MessageClass.cpp
 
@@ -45,7 +45,7 @@ $(NAME_S):		$(DIROBJ_S) $(OBJ) $(OBJ_S)
 				@echo
 
 $(NAME_C):		$(DIROBJ_C) $(OBJ) $(OBJ_C)
-				$(CC) $(INC_LIB) $(CFLAGS) -o $(NAME_C) $(OBJ_C) $(OBJ)
+				$(CC) -o $(NAME_C) $(OBJ_C) $(OBJ) $(INC_LIB) $(CFLAGS)
 
 clean	:
 				$(RM) $(DIROBJ)

@@ -2,7 +2,6 @@
 
 void	Server::incTotalCompressData_by( uint32_t const & size ) {
 	boost::lock_guard<boost::mutex> lock(_server_mutex);
-	_sent_total += size;
 	_compress_data += size;
 }
 
@@ -34,6 +33,7 @@ uint32_t	Server::getTotalSent( void ) const {
 
 uint8_t		Server::getCompressionRatio( void ) const {
 	boost::lock_guard<boost::mutex> lock(_server_mutex);
+	if(!_received_data) return 0;
 	double tmp = static_cast<double>(_compress_data) / static_cast<double>(_received_data);
 	return static_cast<uint8_t>(tmp * 100);
 }
@@ -57,14 +57,14 @@ void		Server::resetCounters( void ) {
 	_compress_data = 0;
 }
 
-void	Server::reject_payload( boost::asio::ip::tcp::socket & sock, uint32_t size ) {
+void	Server::reject_payload( boost::asio::ip::tcp::socket & sock, uint16_t size ) {
 	uint8_t buf[MAX_PAYLOAD_SIZE];
 	while (size) {
 		size -= sock.read_some(boost::asio::buffer(buf, MAX_PAYLOAD_SIZE));
 	}
 }
 
-void *	Server::receive_payload( boost::asio::ip::tcp::socket & sock, uint32_t size ) {
+void *	Server::receive_payload( boost::asio::ip::tcp::socket & sock, uint16_t size ) {
 	if ( !size )
 		throw Server::RequestException( Message::empty_payload );
 	else if ( size > MAX_PAYLOAD_SIZE) {
@@ -106,7 +106,7 @@ void	Server::send_response( boost::asio::ip::tcp::socket & sock, Message & respo
 										 boost::asio::buffer(response.getPayload(), payload_len),
 										 boost::asio::transfer_exactly(payload_len)
 			);
-		incTotalCompressData_by(payload_len);
+		incTotalSent_by(payload_len);
 	}
 }
 
@@ -127,7 +127,8 @@ void	Server::session( uint16_t session_id, boost::shared_ptr< boost::asio::ip::t
 			send_response(*sock, response);
 		}
 		catch (boost::system::system_error & e) {
-			if (e.code() != boost::asio::error::eof) {
+			if (e.code() != boost::asio::error::eof
+				&& e.code() != boost::asio::error::connection_reset) {
 				std::cerr << "Fatal error in session №" << session_id
 						  << ": " << e.what() << std::endl;
 				setServerStatus(Message::system_error);
@@ -184,8 +185,8 @@ void	Server::get_status( Message & response ) {
 	uint32_t	total_received = getTotalReceived();
 	uint8_t		compress_ratio = getCompressionRatio();
 	memcpy(buf.get(), &total_received, sizeof(total_received));
-	memcpy(buf.get(), &total_sent, sizeof(total_sent));
-	memcpy(buf.get(), &compress_ratio, sizeof(compress_ratio));
+	memcpy(buf.get() + sizeof(uint32_t), &total_sent, sizeof(total_sent));
+	memcpy(buf.get() + 2 * sizeof(uint32_t), &compress_ratio, sizeof(compress_ratio));
 	response.setPayload(buf.release());
 	response.setPayloadLength(payload_size);
 }
@@ -197,6 +198,8 @@ void	Server::reset_status( Message & response ) {
 
 void	Server::compress( Message & request, Message & response) {
 	std::string	input(reinterpret_cast< char const* >(request.getPayload()));
+	if (!boost::regex_search(input, boost::regex("^[a-z]+$")))
+		throw Server::RequestException( Message::unsupported_payload );
 	std::string	output (boost::regex_replace(input,
 											 boost::regex("([a-z])\\1{2,}"),
 											 [](boost::smatch const& match) {
@@ -206,17 +209,26 @@ void	Server::compress( Message & request, Message & response) {
 	response.setPayloadLength(output.size());
 	char * tmp = new char[output.size()];
 	memcpy(tmp, output.c_str(), output.size());
+	incTotalCompressData_by(output.size());
 	response.setPayload(tmp);
 }
 
 Server::Server( boost::asio::io_service & io_service ) :
 	_status( Message::response_ok ),
+	_received_total(0),
+	_sent_total(0),
+	_received_data(0),
+	_compress_data(0),
 	_io_service( io_service ),
 	_acceptor( _io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), DEFAULT_PORT))
 {}
 
 Server::Server( boost::asio::io_service & io_service, uint16_t port ) :
 	_status( Message::response_ok ),
+	_received_total(0),
+	_sent_total(0),
+	_received_data(0),
+	_compress_data(0),
 	_io_service( io_service ),
 	_acceptor( _io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {}
@@ -245,6 +257,9 @@ Server::RequestException::RequestException( Message::ResponseCode code )
 		break ;
 	case Message::unsupported_request_type:
 		_what = "Unsupported Request Type";
+		break ;
+	case Message::unsupported_payload:
+		_what = "Unsupported Payload Sequence";
 		break ;
 	case Message::unknown_error:
 	default:
